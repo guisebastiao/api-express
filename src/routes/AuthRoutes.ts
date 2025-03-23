@@ -25,6 +25,11 @@ export class AuthRoutes {
       validateDTO(RegisterValidate),
       this.authController.register.bind(this.authController)
     );
+
+    this.router.post(
+      "/logout",
+      this.authController.logout.bind(this.authController)
+    );
   }
 
   public getRouter(): Router {

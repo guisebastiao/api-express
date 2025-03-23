@@ -1,7 +1,10 @@
-import { RegisterDTO } from "@/DTO/AuthDTO";
+import { LoginDTO, RegisterDTO } from "@/DTO/AuthDTO";
 import { ResponseBodyInterface } from "@/DTO/ResponseBody";
 import { ServerErrorHandler } from "@/exception/ServerErrorHandler";
 import { AuthRepository } from "@/repository/AuthRepository";
+import { tokenExpirate, tokenSecret } from "@/config/env";
+import { users } from "@prisma/client";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 export class AuthService {
@@ -11,8 +14,38 @@ export class AuthService {
     this.authRepository = new AuthRepository();
   }
 
-  public register(dto: RegisterDTO) {
-    const user = this.authRepository.findUserByEmail(dto.email);
+  public async login(dto: LoginDTO): Promise<string | undefined> {
+    const user = await this.authRepository.findUserByEmail(dto.email);
+
+    if (!user) {
+      const responseBody: ResponseBodyInterface = {
+        statusCode: 400,
+        message: "Esse usuário não está cadastrado",
+      };
+
+      throw new ServerErrorHandler(responseBody);
+    }
+
+    const isPasswordCorrect = bcrypt.compareSync(dto.password, user.password);
+
+    if (!isPasswordCorrect) {
+      const responseBody: ResponseBodyInterface = {
+        statusCode: 401,
+        message: "Sua senha está incorreta",
+      };
+
+      throw new ServerErrorHandler(responseBody);
+    }
+
+    const token = jwt.sign({ id: user.id }, tokenSecret, {
+      expiresIn: Number(tokenExpirate),
+    });
+
+    return token;
+  }
+
+  public async register(dto: RegisterDTO): Promise<users> {
+    const user = await this.authRepository.findUserByEmail(dto.email);
 
     if (user != null) {
       const responseBody: ResponseBodyInterface = {
@@ -30,6 +63,6 @@ export class AuthService {
       password: passwordHashed,
     };
 
-    this.authRepository.create(newDto);
+    return this.authRepository.create(newDto);
   }
 }

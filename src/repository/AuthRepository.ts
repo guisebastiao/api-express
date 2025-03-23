@@ -9,18 +9,14 @@ export class AuthRepository {
     this.prisma = prismaDatabase;
   }
 
-  public create(dto: RegisterDTO) {
-    this.prisma.users.create({
-      data: {
-        name: dto.name,
-        email: dto.email,
-        password: dto.password,
-      },
+  public async create(dto: RegisterDTO): Promise<users> {
+    return await this.prisma.users.create({
+      data: { ...dto },
     });
   }
 
-  public findUserByEmail(email: string): Promise<users | null> {
-    return this.prisma.users.findUnique({
+  public async findUserByEmail(email: string): Promise<users | null> {
+    return await this.prisma.users.findUnique({
       where: {
         email,
       },

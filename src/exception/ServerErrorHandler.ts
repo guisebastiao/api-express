@@ -1,5 +1,4 @@
 import { ResponseBodyInterface } from "@/DTO/ResponseBody";
-import { Response } from "express";
 
 export class ServerErrorHandler extends Error {
   private responseBody: ResponseBodyInterface;

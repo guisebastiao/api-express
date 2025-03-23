@@ -7,7 +7,7 @@ import { FieldErrosInterface, ResponseBodyInterface } from "@/DTO/ResponseBody";
 export const validateDTO = (dtoClass: any) => {
   return async (
     req: Request,
-    res: Response,
+    _res: Response,
     next: NextFunction
   ): Promise<void> => {
     const dtoInstance = plainToInstance(dtoClass, req.body);
@@ -33,7 +33,7 @@ export const validateDTO = (dtoClass: any) => {
         fieldErros: fieldErrors,
       };
 
-      throw new ServerErrorHandler(responseBody);
+      return next(new ServerErrorHandler(responseBody));
     }
 
     next();
