@@ -1,9 +1,11 @@
 import { App } from "@/app";
-import dotenv from "dotenv";
+import { nodeEnv, serverPort } from "./config/env";
 
 const app = new App();
 
-dotenv.config();
 const server = app.getServer();
 
-server.listen(3333, () => console.log("Server Running"));
+server.listen(serverPort, () => {
+  console.log(`> Server running on port ${serverPort}`);
+  console.log(`> ${nodeEnv} environment`);
+});
